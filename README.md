@@ -1,4 +1,4 @@
-# Quorum Git Agent
+# Quorum — анализ GitHub-репозиториев
 
 Repository intelligence for engineering teams, available through a visual
 dashboard, REST API and Model Context Protocol tools.
@@ -33,8 +33,8 @@ flowchart LR
 ## Quick start
 
 ```powershell
-git clone https://github.com/rom4ik1346/quorum-git-agent.git
-cd quorum-git-agent
+git clone https://github.com/memorim/quorum-github-analyzer.git
+cd quorum-github-analyzer
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 .\start.ps1
@@ -134,4 +134,3 @@ tests/              unit and API tests
 ## License
 
 MIT
-
