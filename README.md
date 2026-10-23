@@ -1,136 +1,51 @@
 # Quorum — анализ GitHub-репозиториев
 
-Repository intelligence for engineering teams, available through a visual
-dashboard, REST API and Model Context Protocol tools.
+Собирает открытые метаданные репозитория и формирует отчёт о состоянии.
 
-Quorum inspects a public GitHub repository, calculates a transparent health
-score, triages open issues, highlights delivery risks and stores every report
-in SQLite. It works without an LLM key; an MCP-compatible host can use the
-tools immediately.
+**Тип:** Самостоятельный портфолио-проект. Рабочая демонстрационная реализация; коммерческий запуск и использование реальными пользователями не заявляются.
 
-## What it demonstrates
+![CI](https://github.com/memorim/quorum-github-analyzer/actions/workflows/ci.yml/badge.svg)
 
-- Python 3.11 and FastAPI service design
-- GitHub REST API integration with rate-limit handling
-- SQL persistence with migrations created on startup
-- MCP tools built with the official Python SDK
-- deterministic repository scoring and issue triage
-- responsive dashboard with no frontend build step
-- pytest, Ruff, Docker and GitHub Actions
+![Компьютерная версия](docs/desktop.png)
 
-## Architecture
+<img src="docs/mobile.png" width="320" alt="Мобильная версия">
 
-```mermaid
-flowchart LR
-    UI[Dashboard] --> API[FastAPI REST API]
-    HOST[MCP host] --> MCP[MCP server]
-    API --> ENGINE[Analysis engine]
-    MCP --> ENGINE
-    ENGINE --> GH[GitHub REST API]
-    ENGINE --> DB[(SQLite)]
-```
+[Короткая демонстрация сценария](docs/demo.gif)
 
-## Quick start
+## Что работает
+- Получение метаданных GitHub, история отчётов и список рекомендуемых действий.
+- Детерминированная оценка состояния и приоритизация открытых issues.
+- Адаптивная панель, REST и MCP-инструменты.
 
-```powershell
-git clone https://github.com/memorim/quorum-github-analyzer.git
-cd quorum-github-analyzer
+## Стек
+Python, FastAPI, HTTPX, SQLite, GitHub REST API, MCP.
+
+## Запуск и проверка
+Python 3.12. Для PostgreSQL-варианта — Docker или доступная PostgreSQL.
+
+```bash
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
-.\start.ps1
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+python -m pip install -e ".[dev]"
+python -m ruff check .
+python -m pytest -q
+uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
-Open:
+## Технические решения
+- GitHub-клиент отделён от анализа и подменяется в тестах.
+- Проверка оценки тестового репозитория не зависит от старения фиксированной даты fixture.
 
-- dashboard: `http://127.0.0.1:8010`
-- Swagger UI: `http://127.0.0.1:8010/docs`
-- health check: `http://127.0.0.1:8010/api/health`
+## Границы готовности
+- Баллы — эвристика по метаданным; исходный код не анализируется и качество продукта не доказывается.
+- LLM не подключена. Анализ без токена ограничен публичным GitHub API.
+- Список issues/PR и запусков CI ограничен размером запрошенной выборки.
+- Нет авторизации и разграничения истории между пользователями. Демо northstar/atlas-api вымышлено.
 
-The dashboard starts with a seeded fictional repository report, so the
-interface is useful before the first external API request.
+## Подробности
+[API, конфигурация и исходные инструкции](docs/TECHNICAL.md).
 
-## GitHub token
+[Результаты проверки этой версии](docs/VERIFICATION.md).
 
-Public repositories can be analyzed without a token. To increase the API rate
-limit, copy `.env.example` to `.env` and add a fine-grained token:
-
-```dotenv
-GITHUB_TOKEN=github_pat_your_token
-```
-
-The token is read only on the server and is never returned to the browser.
-
-## MCP server
-
-Run the stdio server:
-
-```powershell
-.\.venv\Scripts\python.exe -m app.mcp_server
-```
-
-Example client configuration:
-
-```json
-{
-  "mcpServers": {
-    "quorum": {
-      "command": "C:\\path\\to\\quorum-git-agent\\.venv\\Scripts\\python.exe",
-      "args": ["-m", "app.mcp_server"],
-      "cwd": "C:\\path\\to\\quorum-git-agent"
-    }
-  }
-}
-```
-
-Available tools:
-
-- `analyze_repository`
-- `list_recent_analyses`
-- `get_repository_brief`
-- `create_action_item`
-
-## REST examples
-
-```powershell
-Invoke-RestMethod `
-  -Method Post `
-  -Uri http://127.0.0.1:8010/api/analyses `
-  -ContentType "application/json" `
-  -Body '{"repository":"fastapi/fastapi"}'
-```
-
-```powershell
-Invoke-RestMethod http://127.0.0.1:8010/api/analyses
-```
-
-## Tests
-
-```powershell
-.\.venv\Scripts\python.exe -m ruff check .
-.\.venv\Scripts\python.exe -m pytest --cov=app
-```
-
-## Docker
-
-```powershell
-docker compose up --build
-```
-
-The SQLite database is stored in the `quorum-data` volume.
-
-## Project structure
-
-```text
-app/
-  analyzer.py       transparent scoring and issue triage
-  database.py       SQLite repository
-  github_client.py  async GitHub REST client
-  main.py           FastAPI application
-  mcp_server.py     MCP tool surface
-  static/           dashboard
-tests/              unit and API tests
-```
-
-## License
-
-MIT
+[Пример запроса и ответа API](docs/API_EXAMPLE.md).

@@ -1,3 +1,5 @@
+from copy import deepcopy
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -12,7 +14,9 @@ class FakeGitHubClient:
 
     async def fetch_repository_bundle(self, repository: str) -> dict:
         assert repository == "northstar/atlas-api"
-        return DEMO_BUNDLE
+        bundle = deepcopy(DEMO_BUNDLE)
+        bundle["repository"]["pushed_at"] = datetime.now(UTC).isoformat()
+        return bundle
 
 
 def test_create_and_read_analysis(tmp_path: Path) -> None:
