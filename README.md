@@ -21,13 +21,13 @@
 Python, FastAPI, HTTPX, SQLite, GitHub REST API, MCP.
 
 ## Запуск и проверка
-Python 3.12. Для PostgreSQL-варианта — Docker или доступная PostgreSQL.
+Python 3.12.14.
 
 ```bash
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 # Linux/macOS: source .venv/bin/activate
-python -m pip install -e ".[dev]"
+python -m pip install -c requirements-lock.txt -e ".[dev]"
 python -m ruff check .
 python -m pytest -q
 uvicorn app.main:app --host 127.0.0.1 --port 8010
@@ -49,3 +49,9 @@ uvicorn app.main:app --host 127.0.0.1 --port 8010
 [Результаты проверки этой версии](docs/VERIFICATION.md).
 
 [Пример запроса и ответа API](docs/API_EXAMPLE.md).
+
+## Проверка документации и обновлений
+
+`python .github/scripts/check_docs.py` проверяет ссылки на файлы и изображения в Markdown, регистр имён и случайные локальные ссылки. Примеры команд внутри блоков кода не проверяются как ссылки. `--external` дополнительно проверяет публичные HTTP-ссылки: 404/410 считаются ошибками; авторизация, сетевые сбои и ограничения сервиса отмечаются как непроверенные. HTTP-проверка запускается еженедельно и вручную; локальные ссылки — при каждом push/PR. Фрагменты внутри страниц не проверяются.
+
+Dependabot еженедельно предлагает сгруппированные обновления зависимостей и GitHub Actions. Автоматического слияния нет; обновления проходят CI. [История версии](CHANGELOG.md).
