@@ -1,50 +1,71 @@
-# Quorum — анализ GitHub-репозиториев
+# Quorum — GitHub Metadata Analyzer
 
-Собирает открытые метаданные репозитория и формирует отчёт о состоянии.
+Turn GitHub repository metadata into a repeatable maintenance report.
 
-**Проект:** Самостоятельная разработка.
 
-![CI](https://github.com/memorim/quorum-github-analyzer/actions/workflows/ci.yml/badge.svg)
+![Desktop interface](docs/desktop.png)
 
-![Компьютерная версия](docs/desktop.png)
+<img src="docs/mobile.png" width="320" alt="Mobile interface">
 
-<img src="docs/mobile.png" width="320" alt="Мобильная версия">
+[Short interaction recording](docs/demo.gif)
 
-[Короткая демонстрация сценария](docs/demo.gif)
+## Implemented
 
-## Что работает
-- Получение метаданных GitHub, история отчётов и список рекомендуемых действий.
-- Детерминированная оценка состояния и приоритизация открытых issues.
-- Адаптивная панель, REST и MCP-инструменты.
+- Fetch repository metadata, open issues, pull requests and workflow runs.
+- Persist reports and prioritize suggested maintenance actions.
+- Responsive dashboard, REST endpoints and MCP tools.
 
-## Стек
-Python, FastAPI, HTTPX, SQLite, GitHub REST API, MCP.
+## Stack and architecture
 
-## Запуск и проверка
-Python 3.12.14.
+Python, FastAPI, HTTPX, SQLite, GitHub REST API and MCP.
+
+## Technical mechanisms and security
+
+- A fixed api.github.com client is separate from the scoring rules and replaced by fixtures in tests.
+- Repository references are validated and fetched lists are bounded. Scores are deterministic metadata heuristics; the tool does not inspect source-code correctness.
+
+## Local setup
+
+Python 3.12.14 (see `.python-version`). Activate the virtual environment before the remaining commands.
 
 ```bash
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 # Linux/macOS: source .venv/bin/activate
 python -m pip install -c requirements-lock.txt -e ".[dev]"
-python -m ruff check .
-python -m pytest -q
 uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
-## Технические решения
-- GitHub-клиент отделён от анализа и подменяется в тестах.
-- Проверка оценки тестового репозитория не зависит от старения фиксированной даты fixture.
+## Configuration
 
-## Подробности
-[API, конфигурация и исходные инструкции](docs/TECHNICAL.md).
+Use [.env.example](.env.example) for supported configuration and keep secrets outside Git. See [configuration details](docs/TECHNICAL.md) for loading settings and optional services.
 
-[Результаты проверки этой версии](docs/VERIFICATION.md).
+## Database and upgrades
 
-[Пример запроса и ответа API](docs/API_EXAMPLE.md).
+The SQLite schema initializes on startup. Database/capture paths are configurable; keep persistent data outside temporary build directories.
 
-## Проверки и обновления
-CI проверяет проект и ссылки на локальные материалы. Dependabot предлагает обновления зависимостей и Actions. [История изменений](CHANGELOG.md).
+## Verification
 
-[Контракты API и обновление базы](docs/COMPATIBILITY.md): `python tests/check_contract.py && python tests/check_upgrade.py`.
+```bash
+python -m pytest -q
+python tests/check_contract.py
+python tests/check_upgrade.py
+python -m pip check
+python -m ruff check .
+```
+
+Existing pytest, Ruff, OpenAPI and previous-version upgrade checks; no requests to arbitrary repositories are required for tests.
+
+CI installs locked dependencies and runs the configured checks; documentation checks also validate local links/images. Python dependency auditing uses `pip-audit --disable-pip --no-deps --strict -r requirements-lock.txt`. A passing scanner only reports known advisories at the time of the run.
+
+## Limits and next steps
+
+- A report is not a security/code audit or evidence of production quality. API permissions, rate limits and truncated lists affect observations.
+- Some optional API failures use empty fallback results. Expose missing-data provenance before interpreting absence as health; no exploit or incorrect score was proven here.
+- Local tool without public multi-tenant authentication. Keep GitHub tokens outside version control.
+
+## Further documentation
+
+[Audit findings and follow-up](docs/AUDIT_2026_10.md) · [Technical reference](docs/TECHNICAL.md) · [Change history](CHANGELOG.md)
+
+[API request/response example](docs/API_EXAMPLE.md)
