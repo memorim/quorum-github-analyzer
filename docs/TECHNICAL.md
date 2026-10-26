@@ -5,7 +5,7 @@ dashboard, REST API and Model Context Protocol tools.
 
 Quorum inspects a public GitHub repository, calculates a transparent health
 score, triages open issues, highlights delivery risks and stores every report
-in SQLite. It works without an LLM key; an MCP-compatible host can use the
+in SQLite. An MCP-compatible host can use the
 tools immediately.
 
 ## What it demonstrates
@@ -136,4 +136,4 @@ tests/              unit and API tests
 MIT
 
 ## Текущий режим работы
-Оценка строится по открытым метаданным GitHub: это эвристика, без анализа исходного кода и без LLM. Выборки issues/PR и CI ограничены запрошенным размером; без токена действуют публичные лимиты GitHub. История общая, поэтому внешний доступ требует авторизации.
+Оценка строится по открытым метаданным GitHub: это эвристика по метаданным; анализ исходного кода не выполняется. Выборки issues/PR и CI ограничены запрошенным размером; без токена действуют публичные лимиты GitHub. История общая, поэтому внешний доступ требует авторизации.
