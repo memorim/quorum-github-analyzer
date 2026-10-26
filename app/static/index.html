@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-
     <div class="app-shell">
       <aside class="sidebar">
         <a class="brand" href="/" aria-label="Quorum dashboard">
@@ -45,7 +44,7 @@
         <a class="docs-link" href="/docs">Open API docs ↗</a>
       </aside>
 
-      <main><div role="note" style="padding:9px 16px;background:#222;color:#fff;font:12px/1.5 system-ui;text-align:center">Портфолио-демо · Данные-примеры · Без реальных заказов, оплаты и отправки писем</div>
+      <main>
         <header class="topbar">
           <div>
             <p class="eyebrow">ENGINEERING HEALTH / DEMO</p>
@@ -61,7 +60,10 @@
           <div>
             <p class="section-kicker">NEW ANALYSIS</p>
             <h2 id="analysis-title">Inspect a public repository</h2>
-            <p>Quorum turns activity, CI, backlog and project metadata into a focused action plan.</p>
+            <p>
+              Quorum turns activity, CI, backlog and project metadata into a
+              focused action plan.
+            </p>
           </div>
           <form id="analysis-form">
             <label for="repository">Repository</label>
@@ -75,11 +77,18 @@
               />
               <button id="analyze-button" type="submit">Run analysis</button>
             </div>
-            <button class="text-button" id="demo-button" type="button">Use demo dataset</button>
+            <button class="text-button" id="demo-button" type="button">
+              Use demo dataset
+            </button>
           </form>
         </section>
 
-        <div id="message" class="message" role="status" aria-live="polite"></div>
+        <div
+          id="message"
+          class="message"
+          role="status"
+          aria-live="polite"
+        ></div>
 
         <section id="overview" class="metric-grid" aria-label="Overview">
           <article class="metric-card feature">
@@ -116,7 +125,9 @@
                 <p class="section-kicker">CURRENT REPORT</p>
                 <h2 id="repository-name">Loading report…</h2>
               </div>
-              <a id="repository-link" href="#" target="_blank" rel="noreferrer">GitHub ↗</a>
+              <a id="repository-link" href="#" target="_blank" rel="noreferrer"
+                >GitHub ↗</a
+              >
             </div>
             <p class="verdict" id="verdict"></p>
             <p class="summary" id="summary"></p>
@@ -183,4 +194,3 @@
     <script src="/static/app.js" defer></script>
   </body>
 </html>
-

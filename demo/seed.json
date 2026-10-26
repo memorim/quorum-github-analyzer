@@ -1,0 +1,227 @@
+{
+  "/api/analyses": [
+    {
+      "repository": "memorim/flowboard-project-manager",
+      "repository_url": "https://github.com/memorim/flowboard-project-manager",
+      "score": 90,
+      "verdict": "Strong metadata maintenance signals (partial snapshot)",
+      "summary": "memorim/flowboard-project-manager scored 90/100. Quorum found 2 risk signal(s) and 1 recommended action(s).",
+      "metrics": {
+        "stars": 0,
+        "forks": 0,
+        "open_issues": 0,
+        "open_pulls": 2,
+        "days_since_push": 0,
+        "ci_success_rate": 80.0,
+        "default_branch": "main",
+        "language_mix": [
+          {
+            "name": "TypeScript",
+            "share": 79.3
+          },
+          {
+            "name": "JavaScript",
+            "share": 13.7
+          },
+          {
+            "name": "CSS",
+            "share": 6.6
+          },
+          {
+            "name": "HTML",
+            "share": 0.3
+          },
+          {
+            "name": "Batchfile",
+            "share": 0.1
+          }
+        ],
+        "analysis_scope": "github_metadata_only",
+        "collection": {
+          "issues": {
+            "available": true,
+            "truncated": false
+          },
+          "pulls": {
+            "available": true,
+            "truncated": false
+          },
+          "workflow_runs": {
+            "available": true,
+            "truncated": true
+          }
+        },
+        "analyzed_at": "2026-10-26T17:08:22.471199+00:00"
+      },
+      "risks": [
+        {
+          "severity": "medium",
+          "title": "No license detected",
+          "detail": "Reuse and contribution terms are ambiguous."
+        },
+        {
+          "severity": "low",
+          "title": "Incomplete metadata snapshot",
+          "detail": "Unavailable or bounded samples: workflow_runs"
+        }
+      ],
+      "actions": [
+        {
+          "priority": "high",
+          "title": "Choose and add a license",
+          "why": "Clarify legal usage and contribution terms."
+        }
+      ],
+      "triaged_issues": [],
+      "id": "flowboard-project-manager",
+      "created_at": "2026-10-26T17:08:22.471199+00:00"
+    },
+    {
+      "repository": "memorim/seatly-workspace-booking",
+      "repository_url": "https://github.com/memorim/seatly-workspace-booking",
+      "score": 90,
+      "verdict": "Strong metadata maintenance signals (partial snapshot)",
+      "summary": "memorim/seatly-workspace-booking scored 90/100. Quorum found 2 risk signal(s) and 1 recommended action(s).",
+      "metrics": {
+        "stars": 0,
+        "forks": 0,
+        "open_issues": 0,
+        "open_pulls": 2,
+        "days_since_push": 0,
+        "ci_success_rate": 85.0,
+        "default_branch": "main",
+        "language_mix": [
+          {
+            "name": "TypeScript",
+            "share": 76.7
+          },
+          {
+            "name": "JavaScript",
+            "share": 12.4
+          },
+          {
+            "name": "CSS",
+            "share": 10.3
+          },
+          {
+            "name": "HTML",
+            "share": 0.4
+          },
+          {
+            "name": "Batchfile",
+            "share": 0.2
+          }
+        ],
+        "analysis_scope": "github_metadata_only",
+        "collection": {
+          "issues": {
+            "available": true,
+            "truncated": false
+          },
+          "pulls": {
+            "available": true,
+            "truncated": false
+          },
+          "workflow_runs": {
+            "available": true,
+            "truncated": true
+          }
+        },
+        "analyzed_at": "2026-10-26T17:08:25.241785+00:00"
+      },
+      "risks": [
+        {
+          "severity": "medium",
+          "title": "No license detected",
+          "detail": "Reuse and contribution terms are ambiguous."
+        },
+        {
+          "severity": "low",
+          "title": "Incomplete metadata snapshot",
+          "detail": "Unavailable or bounded samples: workflow_runs"
+        }
+      ],
+      "actions": [
+        {
+          "priority": "high",
+          "title": "Choose and add a license",
+          "why": "Clarify legal usage and contribution terms."
+        }
+      ],
+      "triaged_issues": [],
+      "id": "seatly-workspace-booking",
+      "created_at": "2026-10-26T17:08:25.241785+00:00"
+    },
+    {
+      "repository": "memorim/quorum-github-analyzer",
+      "repository_url": "https://github.com/memorim/quorum-github-analyzer",
+      "score": 100,
+      "verdict": "Strong metadata maintenance signals (partial snapshot)",
+      "summary": "memorim/quorum-github-analyzer scored 100/100. Quorum found 1 risk signal(s) and 1 recommended action(s).",
+      "metrics": {
+        "stars": 0,
+        "forks": 0,
+        "open_issues": 0,
+        "open_pulls": 3,
+        "days_since_push": 0,
+        "ci_success_rate": 100.0,
+        "default_branch": "main",
+        "language_mix": [
+          {
+            "name": "Python",
+            "share": 66.4
+          },
+          {
+            "name": "CSS",
+            "share": 12.6
+          },
+          {
+            "name": "JavaScript",
+            "share": 11.9
+          },
+          {
+            "name": "HTML",
+            "share": 7.9
+          },
+          {
+            "name": "PowerShell",
+            "share": 0.7
+          }
+        ],
+        "analysis_scope": "github_metadata_only",
+        "collection": {
+          "issues": {
+            "available": true,
+            "truncated": false
+          },
+          "pulls": {
+            "available": true,
+            "truncated": false
+          },
+          "workflow_runs": {
+            "available": true,
+            "truncated": true
+          }
+        },
+        "analyzed_at": "2026-10-26T17:08:26.806460+00:00"
+      },
+      "risks": [
+        {
+          "severity": "low",
+          "title": "Incomplete metadata snapshot",
+          "detail": "Unavailable or bounded samples: workflow_runs"
+        }
+      ],
+      "actions": [
+        {
+          "priority": "low",
+          "title": "Keep the current engineering cadence",
+          "why": "No urgent corrective action is required."
+        }
+      ],
+      "triaged_issues": [],
+      "id": "quorum-github-analyzer",
+      "created_at": "2026-10-26T17:08:26.806460+00:00"
+    }
+  ]
+}
