@@ -1,32 +1,33 @@
-# Quorum — GitHub Metadata Analyzer
+# Quorum — анализ метаданных GitHub
 
-Turn GitHub repository metadata into a repeatable maintenance report.
+Повторяемый отчёт о сопровождении репозитория по открытым метаданным GitHub.
 
 
-![Desktop interface](docs/desktop.png)
 
-<img src="docs/mobile.png" width="320" alt="Mobile interface">
+![Компьютерная версия](docs/desktop.png)
 
-[Short interaction recording](docs/demo.gif)
+<img src="docs/mobile.png" width="320" alt="Мобильная версия">
 
-## Implemented
+[Короткая демонстрация](docs/demo.gif)
 
-- Fetch repository metadata, open issues, pull requests and workflow runs.
-- Persist reports and prioritize suggested maintenance actions.
-- Responsive dashboard, REST endpoints and MCP tools.
+## Возможности
 
-## Stack and architecture
+- Загрузка сведений о репозитории, issues, pull requests и запусках workflows.
+- Хранение отчётов и приоритизация работ по сопровождению.
+- Адаптивная панель, REST API и MCP-инструменты.
 
-Python, FastAPI, HTTPX, SQLite, GitHub REST API and MCP.
+## Стек и устройство
 
-## Technical mechanisms and security
+Python, FastAPI, HTTPX, SQLite, GitHub REST API и MCP.
 
-- A fixed api.github.com client is separate from the scoring rules and replaced by fixtures in tests.
-- Repository references are validated and fetched lists are bounded. Scores are deterministic metadata heuristics; the tool does not inspect source-code correctness.
+## Ключевые решения
 
-## Local setup
+- Клиент фиксированного api.github.com отделён от правил оценки и заменяется заглушкой в тестах.
+- Ссылки на репозитории валидируются, выборки ограничены. Оценки — детерминированные эвристики метаданных, без проверки корректности исходного кода.
 
-Python 3.12.14 (see `.python-version`). Activate the virtual environment before the remaining commands.
+## Локальный запуск
+
+Python 3.12.14, как в `.python-version`. Перед установкой зависимостей активируйте виртуальное окружение.
 
 ```bash
 python -m venv .venv
@@ -36,15 +37,17 @@ python -m pip install -c requirements-lock.txt -e ".[dev]"
 uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
-## Configuration
+Команда запуска привязывает API к локальному адресу 127.0.0.1.
 
-Use [.env.example](.env.example) for supported configuration and keep secrets outside Git. See [configuration details](docs/TECHNICAL.md) for loading settings and optional services.
+## Настройки
 
-## Database and upgrades
+Доступные параметры перечислены в [.env.example](.env.example). Секреты храните вне Git. Порядок загрузки настроек и необязательные службы описаны в [технической документации](docs/TECHNICAL.md).
 
-The SQLite schema initializes on startup. Database/capture paths are configurable; keep persistent data outside temporary build directories.
+## Данные и обновления
 
-## Verification
+Схема SQLite создаётся при запуске. Пути к базе и снимкам настраиваются; постоянные данные должны находиться вне временных каталогов сборки.
+
+## Проверки
 
 ```bash
 python -m pytest -q
@@ -54,18 +57,16 @@ python -m pip check
 python -m ruff check .
 ```
 
-Existing pytest, Ruff, OpenAPI and previous-version upgrade checks; no requests to arbitrary repositories are required for tests.
+Pytest, Ruff, OpenAPI и обновление предыдущей схемы проверяются локально; для тестов не требуется доступ к произвольным публичным репозиториям.
 
-CI installs locked dependencies and runs the configured checks; documentation checks also validate local links/images. Python dependency auditing uses `pip-audit --disable-pip --no-deps --strict -r requirements-lock.txt`. A passing scanner only reports known advisories at the time of the run.
+CI устанавливает зависимости по зафиксированным версиям и запускает настроенные проверки. Отдельная проверка документации находит неверные локальные ссылки и изображения. Проверка уязвимостей учитывает известные проблемы на момент запуска.
 
-## Limits and next steps
+## Ограничения
 
-- A report is not a security/code audit or evidence of production quality. API permissions, rate limits and truncated lists affect observations.
-- Some optional API failures use empty fallback results. Expose missing-data provenance before interpreting absence as health; no exploit or incorrect score was proven here.
-- Local tool without public multi-tenant authentication. Keep GitHub tokens outside version control.
+- Отчёт не является аудитом безопасности или доказательством качества эксплуатации. На наблюдения влияют права токена, лимиты API и обрезанные выборки.
+- Некоторые ошибки необязательных API возвращают пустой запасной результат; отсутствие данных нельзя автоматически считать признаком здоровья проекта.
+- Инструмент рассчитан на локальную работу, без публичной многопользовательской авторизации. Токены GitHub должны храниться вне репозитория.
 
-## Further documentation
+## Документация
 
-[Audit findings and follow-up](docs/AUDIT_2026_10.md) · [Technical reference](docs/TECHNICAL.md) · [Change history](CHANGELOG.md)
-
-[API request/response example](docs/API_EXAMPLE.md)
+[Результаты аудита](docs/AUDIT_2026_10.md) · [Техническая документация](docs/TECHNICAL.md) · [Пример запроса и ответа](docs/API_EXAMPLE.md) · [История изменений](CHANGELOG.md)
