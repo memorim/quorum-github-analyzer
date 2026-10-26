@@ -35,6 +35,7 @@
             "examples": [
               "fastapi/fastapi"
             ],
+            "maxLength": 140,
             "title": "Repository",
             "type": "string"
           }

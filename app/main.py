@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.analyzer import analyze_repository_bundle
 from app.config import PROJECT_ROOT, database_path, github_token
@@ -32,6 +33,9 @@ def create_app(database_file: Path | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     application.state.database = database
+    application.add_middleware(
+        TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "[::1]"]
+    )
     application.state.github_client_factory = GitHubClient
     static_directory = PROJECT_ROOT / "app" / "static"
     application.mount("/static", StaticFiles(directory=static_directory), name="static")
@@ -46,21 +50,7 @@ def create_app(database_file: Path | None = None) -> FastAPI:
 
     @application.get("/api/overview", tags=["analysis"])
     async def overview() -> dict[str, float | int]:
-        analyses = database.list_analyses(limit=100)
-        actions = database.list_action_items(limit=100)
-        average_score = (
-            round(
-                sum(item["score"] for item in analyses) / len(analyses),
-                1,
-            )
-            if analyses
-            else 0
-        )
-        return {
-            "analyses": len(analyses),
-            "average_score": average_score,
-            "open_actions": sum(item["status"] == "open" for item in actions),
-        }
+        return database.overview()
 
     @application.get("/api/analyses", tags=["analysis"])
     async def list_analyses(limit: int = 20) -> list[dict]:

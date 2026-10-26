@@ -1,3 +1,8 @@
+const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+function safeLink(value) {
+  try { const url = new URL(value); return url.protocol === 'https:' && url.hostname === 'github.com' ? url.href : '#'; }
+  catch { return '#'; }
+}
 const state = {
   analyses: [],
   selected: null,
@@ -66,7 +71,7 @@ function renderOverview(overview, analysis) {
 function renderReport(analysis) {
   state.selected = analysis;
   elements.repositoryName.textContent = analysis.repository;
-  elements.repositoryLink.href = analysis.repository_url || "#";
+  elements.repositoryLink.href = safeLink(analysis.repository_url);
   elements.repositoryLink.hidden = !analysis.repository_url;
   elements.verdict.textContent = analysis.verdict;
   elements.summary.textContent = analysis.summary;
@@ -74,15 +79,15 @@ function renderReport(analysis) {
   const metrics = [
     ["Stars", analysis.metrics.stars],
     ["Forks", analysis.metrics.forks],
-    ["Open issues", analysis.metrics.open_issues],
+    ["Sampled open issues", analysis.metrics.open_issues],
     ["Days since push", analysis.metrics.days_since_push],
   ];
   elements.miniMetrics.innerHTML = metrics
     .map(
       ([label, value]) => `
         <div class="mini-metric">
-          <strong>${value}</strong>
-          <span>${label}</span>
+          <strong>${escapeHTML(value)}</strong>
+          <span>${escapeHTML(label)}</span>
         </div>
       `,
     )
@@ -93,11 +98,11 @@ function renderReport(analysis) {
         .map(
           (language) => `
             <div class="language-row">
-              <span>${language.name}</span>
+              <span>${escapeHTML(language.name)}</span>
               <div class="language-track">
                 <span style="width:${Math.max(language.share, 2)}%"></span>
               </div>
-              <strong>${language.share}%</strong>
+              <strong>${Number(language.share) || 0}%</strong>
             </div>
           `,
         )
@@ -109,10 +114,10 @@ function renderReport(analysis) {
       (risk) => `
         <div class="stack-item">
           <div class="stack-top">
-            <strong>${risk.title}</strong>
-            <span class="severity-pill ${risk.severity}">${risk.severity}</span>
+            <strong>${escapeHTML(risk.title)}</strong>
+            <span class="severity-pill ${escapeHTML(risk.severity)}">${escapeHTML(risk.severity)}</span>
           </div>
-          <p>${risk.detail}</p>
+          <p>${escapeHTML(risk.detail)}</p>
         </div>
       `,
     )
@@ -123,10 +128,10 @@ function renderReport(analysis) {
       (action) => `
         <div class="stack-item">
           <div class="stack-top">
-            <strong>${action.title}</strong>
-            <span class="priority-pill ${action.priority}">${action.priority}</span>
+            <strong>${escapeHTML(action.title)}</strong>
+            <span class="priority-pill ${escapeHTML(action.priority)}">${escapeHTML(action.priority)}</span>
           </div>
-          <p>${action.why}</p>
+          <p>${escapeHTML(action.why)}</p>
         </div>
       `,
     )
@@ -136,16 +141,16 @@ function renderReport(analysis) {
     ? analysis.triaged_issues
         .map(
           (issue) => `
-            <a class="triage-row" href="${issue.url || "#"}" target="_blank" rel="noreferrer">
-              <span class="issue-number">#${issue.number}</span>
-              <strong class="issue-title">${issue.title}</strong>
-              <span class="priority-pill ${issue.priority}">${issue.priority}</span>
-              <span class="issue-meta">${issue.age_days}d · ${issue.comments} msg</span>
+            <a class="triage-row" href="${escapeHTML(safeLink(issue.url))}" target="_blank" rel="noreferrer">
+              <span class="issue-number">#${escapeHTML(issue.number)}</span>
+              <strong class="issue-title">${escapeHTML(issue.title)}</strong>
+              <span class="priority-pill ${escapeHTML(issue.priority)}">${escapeHTML(issue.priority)}</span>
+              <span class="issue-meta">${escapeHTML(issue.age_days)}d · ${escapeHTML(issue.comments)} msg</span>
             </a>
           `,
         )
         .join("")
-    : '<div class="empty-state">No open issues were returned for this repository.</div>';
+    : '<div class="empty-state">No issues in the available sample; check data completeness above.</div>';
 }
 
 function renderHistory() {
@@ -153,12 +158,12 @@ function renderHistory() {
     .slice(0, 8)
     .map(
       (analysis) => `
-        <button class="history-item" data-analysis-id="${analysis.id}" type="button">
+        <button class="history-item" data-analysis-id="${escapeHTML(analysis.id)}" type="button">
           <span class="history-top">
-            <strong>${analysis.repository}</strong>
-            <span class="score-pill">${analysis.score}</span>
+            <strong>${escapeHTML(analysis.repository)}</strong>
+            <span class="score-pill">${escapeHTML(analysis.score)}</span>
           </span>
-          <small>${formatDate(analysis.created_at)} · ${analysis.verdict}</small>
+          <small>${formatDate(analysis.created_at)} · ${escapeHTML(analysis.verdict)}</small>
         </button>
       `,
     )
@@ -199,7 +204,7 @@ async function createAnalysis(repository) {
       body: JSON.stringify({ repository }),
     });
     await refresh(analysis);
-    setMessage(`Analysis saved for ${analysis.repository}.`);
+    setMessage(`Analysis saved for ${escapeHTML(analysis.repository)}.`);
     elements.form.reset();
   } catch (error) {
     setMessage(error.message, "error");
