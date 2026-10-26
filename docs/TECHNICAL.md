@@ -11,7 +11,7 @@ tools immediately.
 ## What it demonstrates
 
 - Python 3.11 and FastAPI service design
-- GitHub REST API integration with rate-limit handling
+- GitHub REST API integration with explicit errors and bounded pagination
 - SQL persistence with migrations created on startup
 - MCP tools built with the official Python SDK
 - deterministic repository scoring and issue triage
@@ -136,4 +136,6 @@ tests/              unit and API tests
 MIT
 
 ## Текущий режим работы
-Оценка строится по открытым метаданным GitHub: это эвристика по метаданным; анализ исходного кода не выполняется. Выборки issues/PR и CI ограничены запрошенным размером; без токена действуют публичные лимиты GitHub. История общая, поэтому внешний доступ требует авторизации.
+Оценка строится по открытым метаданным GitHub; анализ исходного кода не выполняется (`metrics.analysis_scope=github_metadata_only`). Выборки issues/PR ограничены 3×50 и 2×50 записями, а CI — последними 20 запусками. Issues endpoint также содержит PR, которые исключаются перед анализом. `metrics.collection` фиксирует ошибки и границы выборки. Данные загружаются последовательно, поэтому это не транзакционный снимок GitHub. Пропущенные необязательные данные не считаются доказательством отсутствия CI. Неизвестная дата push не превращается в фиктивные 999 дней простоя.
+
+HTTPX использует фиксированный api.github.com и 15-секундный timeout. Location и Link URL не запрашиваются: страницы строятся из проверенного owner/name. Переезд репозитория требует ввода актуального имени. Повторных запросов при сбое и rate limit нет; ошибки не раскрывают токен или произвольный ответ сервера. Схема SQLite не менялась: новые признаки полноты сохраняются в существующем metrics_json, старые отчёты остаются прежними снимками. История и задачи общие, поэтому внешний доступ требует авторизации; Compose привязывает порт к loopback, штатный MCP поддерживает только stdio. Заголовки issues считаются недоверенными данными и экранируются панелью.

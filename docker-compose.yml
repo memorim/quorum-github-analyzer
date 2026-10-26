@@ -2,7 +2,7 @@ services:
   quorum:
     build: .
     ports:
-      - "8010:8010"
+      - "127.0.0.1:8010:8010"
     environment:
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
     volumes:

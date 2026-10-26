@@ -7,9 +7,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY pyproject.toml README.md ./
+COPY requirements-lock.txt ./
 COPY app ./app
 
-RUN python -m pip install --no-cache-dir .
+RUN python -m pip install --no-cache-dir -c requirements-lock.txt .
 
 EXPOSE 8010
 

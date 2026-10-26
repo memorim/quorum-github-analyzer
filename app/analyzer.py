@@ -7,7 +7,11 @@ from typing import Any
 def _parse_github_date(value: str | None) -> datetime | None:
     if not value:
         return None
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    try:
+        result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return result.replace(tzinfo=UTC) if result.tzinfo is None else result
+    except (ValueError, AttributeError):
+        return None
 
 
 def _risk(severity: str, title: str, detail: str) -> dict[str, str]:
@@ -77,14 +81,15 @@ def analyze_repository_bundle(
     issues = bundle.get("issues", [])
     pulls = bundle.get("pulls", [])
     workflow_runs = bundle.get("workflow_runs", [])
+    collection = bundle.get("collection", {})
 
     score = 100
     risks: list[dict[str, str]] = []
     actions: list[dict[str, str]] = []
 
     pushed_at = _parse_github_date(repository.get("pushed_at"))
-    days_since_push = (current - pushed_at).days if pushed_at else 999
-    if days_since_push > 180:
+    days_since_push = max(0, (current - pushed_at).days) if pushed_at else None
+    if days_since_push is not None and days_since_push > 180:
         score -= 25
         risks.append(
             _risk("high", "Repository is inactive", f"No push for {days_since_push} days.")
@@ -92,7 +97,7 @@ def analyze_repository_bundle(
         actions.append(
             _action("high", "Plan a maintenance release", "Restore a visible delivery cadence.")
         )
-    elif days_since_push > 60:
+    elif days_since_push is not None and days_since_push > 60:
         score -= 12
         risks.append(
             _risk("medium", "Delivery cadence slowed", f"Last push was {days_since_push} days ago.")
@@ -163,7 +168,7 @@ def analyze_repository_bundle(
     concluded_runs = [run for run in workflow_runs if run.get("conclusion")]
     successful_runs = sum(run.get("conclusion") == "success" for run in concluded_runs)
     ci_success_rate = successful_runs / len(concluded_runs) if concluded_runs else None
-    if not workflow_runs:
+    if not workflow_runs and collection.get("workflow_runs", {}).get("available", True):
         score -= 12
         risks.append(
             _risk(
@@ -190,6 +195,17 @@ def analyze_repository_bundle(
             )
         )
 
+    incomplete = [
+        name for name, state in collection.items() if not state["available"] or state["truncated"]
+    ]
+    if incomplete or pushed_at is None:
+        risks.append(
+            _risk(
+                "low",
+                "Incomplete metadata snapshot",
+                "Unavailable or bounded samples: " + ", ".join(incomplete or ["last push date"]),
+            )
+        )
     if not risks:
         risks.append(
             _risk("low", "No immediate risks detected", "The repository signals look healthy.")
@@ -211,13 +227,15 @@ def analyze_repository_bundle(
 
     score = max(0, min(score, 100))
     if score >= 85:
-        verdict = "Strong engineering signals"
+        verdict = "Strong metadata maintenance signals"
     elif score >= 70:
         verdict = "Healthy with a few visible gaps"
     elif score >= 50:
         verdict = "Needs focused maintenance"
     else:
-        verdict = "High operational risk"
+        verdict = "Metadata indicates maintenance gaps"
+    if incomplete:
+        verdict += " (partial snapshot)"
 
     triaged_issues = triage_issues(issues, current)
     metrics = {
@@ -229,6 +247,9 @@ def analyze_repository_bundle(
         "ci_success_rate": round(ci_success_rate * 100, 1) if ci_success_rate is not None else None,
         "default_branch": repository.get("default_branch", "main"),
         "language_mix": language_mix,
+        "analysis_scope": "github_metadata_only",
+        "collection": collection,
+        "analyzed_at": current.isoformat(),
     }
 
     return {

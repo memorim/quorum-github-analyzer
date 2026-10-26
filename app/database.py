@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -12,12 +13,26 @@ class Database:
     def __init__(self, path: Path) -> None:
         self.path = path
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
         connection = sqlite3.connect(self.path)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
-        return connection
+        try:
+            with connection:
+                yield connection
+        finally:
+            connection.close()
+
+    def overview(self) -> dict[str, int | float]:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT COUNT(*) AS analyses, COALESCE(ROUND(AVG(score),1),0) AS average_score, "
+                "(SELECT COUNT(*) FROM action_items WHERE status='open') AS open_actions "
+                "FROM analyses"
+            ).fetchone()
+        return dict(row)
 
     def initialize(self) -> None:
         with self._connect() as connection:
