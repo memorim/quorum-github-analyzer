@@ -3,6 +3,32 @@ const assert = require('node:assert/strict');
 const {readFileSync} = require('node:fs');
 const {runInNewContext} = require('node:vm');
 
+test('light theme is default; dark mode persists and tolerates blocked storage', () => {
+  for (const saved of [null, 'dark', 'invalid', 'blocked']) {
+    let loaded, clicked, pressed, stored;
+    const document = {
+      documentElement: {dataset: {}},
+      addEventListener(_event, handler) { loaded = handler; },
+      querySelector() { return {
+        setAttribute(_key, value) { pressed = value; },
+        addEventListener(_event, handler) { clicked = handler; },
+      }; },
+    };
+    const localStorage = {
+      getItem() { if (saved === 'blocked') throw new Error('blocked'); return saved; },
+      setItem(key, value) { if (saved === 'blocked') throw new Error('blocked'); stored = [key, value]; },
+    };
+    runInNewContext(readFileSync('app/static/theme.js', 'utf8'), {document, localStorage});
+    loaded();
+    assert.equal(document.documentElement.dataset.theme, saved === 'dark' ? 'dark' : 'light');
+    assert.equal(pressed, String(saved === 'dark'));
+    clicked();
+    assert.equal(document.documentElement.dataset.theme, saved === 'dark' ? 'light' : 'dark');
+    assert.equal(pressed, String(saved !== 'dark'));
+    if (saved !== 'blocked') assert.deepEqual(stored, ['quorum-theme', saved === 'dark' ? 'light' : 'dark']);
+  }
+});
+
 test('dashboard treats repository titles as text and rejects executable links', () => {
   const nodes = new Map();
   const document = {querySelector(selector) {
