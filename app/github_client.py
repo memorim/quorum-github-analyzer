@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -116,7 +117,26 @@ class GitHubClient:
     @staticmethod
     async def _get(client: httpx.AsyncClient, path: str, params: dict | None = None):
         try:
-            response = await client.get(path, params=params)
+            for attempt in range(3):
+                try:
+                    response = await client.get(path, params=params)
+                except httpx.TransportError:
+                    if attempt == 2:
+                        raise
+                    await asyncio.sleep(0.25 * 2 ** attempt)
+                    continue
+                # Retry only temporary upstream failures; never retry permission errors,
+                # redirects, invalid JSON or rate limits without an explicit short delay.
+                retryable = response.status_code in {500, 502, 503, 504}
+                delay = 0.25 * 2 ** attempt
+                if response.status_code in {403, 429}:
+                    retry_after = response.headers.get("retry-after", "")
+                    if retry_after.isdigit() and 0 <= int(retry_after) <= 2:
+                        retryable, delay = True, float(retry_after)
+                if not retryable or attempt == 2:
+                    break
+                await response.aclose()
+                await asyncio.sleep(delay)
             response.raise_for_status()
         except httpx.HTTPStatusError as error:
             response = error.response
