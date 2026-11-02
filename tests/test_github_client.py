@@ -200,14 +200,19 @@ def test_invalid_repository_shapes_are_domain_errors(monkeypatch, payload):
 
 def test_transient_failure_recovers_and_stops_after_success(monkeypatch):
     calls = []
+
     def handler(request):
         calls.append(request)
         if len(calls) < 3:
             return httpx.Response(503)
         return httpx.Response(200, json={"ok": True})
+
     async def run():
-        async with client_type(transport=httpx.MockTransport(handler), base_url="https://api.github.com") as client:
+        async with client_type(
+            transport=httpx.MockTransport(handler), base_url="https://api.github.com"
+        ) as client:
             return await GitHubClient._get(client, "/repos/owner/repo")
+
     result, _ = asyncio.run(run())
     assert result == {"ok": True}
     assert len(calls) == 3
@@ -215,12 +220,17 @@ def test_transient_failure_recovers_and_stops_after_success(monkeypatch):
 
 def test_short_retry_after_is_honored_but_long_wait_is_not_retried(monkeypatch):
     calls = []
+
     def handler(request):
         calls.append(request)
         return httpx.Response(429, headers={"Retry-After": "0" if len(calls) == 1 else "3600"})
+
     async def run():
-        async with client_type(transport=httpx.MockTransport(handler), base_url="https://api.github.com") as client:
+        async with client_type(
+            transport=httpx.MockTransport(handler), base_url="https://api.github.com"
+        ) as client:
             await GitHubClient._get(client, "/repos/owner/repo")
+
     with pytest.raises(GitHubClientError, match="rate limit"):
         asyncio.run(run())
     assert len(calls) == 2

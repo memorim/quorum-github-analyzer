@@ -123,12 +123,12 @@ class GitHubClient:
                 except httpx.TransportError:
                     if attempt == 2:
                         raise
-                    await asyncio.sleep(0.25 * 2 ** attempt)
+                    await asyncio.sleep(0.25 * 2**attempt)
                     continue
                 # Retry only temporary upstream failures; never retry permission errors,
                 # redirects, invalid JSON or rate limits without an explicit short delay.
                 retryable = response.status_code in {500, 502, 503, 504}
-                delay = 0.25 * 2 ** attempt
+                delay = 0.25 * 2**attempt
                 if response.status_code in {403, 429}:
                     retry_after = response.headers.get("retry-after", "")
                     if retry_after.isdigit() and 0 <= int(retry_after) <= 2:
