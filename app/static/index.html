@@ -54,11 +54,19 @@
           <div class="topbar-status">
             <span class="status-dot"></span>
             GitHub REST API
-            <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
           </div>
         </header>
 
         <section class="command-panel" aria-labelledby="analysis-title">
+          <div class="panel-tools">
+            <button class="theme-toggle" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Тёмная тема" title="Тёмная тема">
+              <span class="theme-state theme-state-off" aria-hidden="true">ВЫКЛ</span>
+              <span class="theme-state theme-state-on" aria-hidden="true">ВКЛ</span>
+              <span class="theme-thumb" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.2A8.5 8.5 0 0 1 10.8 3.5a8.5 8.5 0 1 0 9.7 9.7Z"/></svg>
+              </span>
+            </button>
+          </div>
           <div>
             <p class="section-kicker">NEW ANALYSIS</p>
             <h2 id="analysis-title">Inspect a public repository</h2>

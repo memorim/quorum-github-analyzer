@@ -6,11 +6,11 @@ document.documentElement.dataset.theme = theme;
 
 document.addEventListener("DOMContentLoaded", () => {
   const button = document.querySelector("#theme-toggle");
-  button.setAttribute("aria-pressed", String(theme === "dark"));
+  button.setAttribute("aria-checked", String(theme === "dark"));
   button.addEventListener("click", () => {
     theme = theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = theme;
-    button.setAttribute("aria-pressed", String(theme === "dark"));
+    button.setAttribute("aria-checked", String(theme === "dark"));
     try {
       localStorage.setItem("quorum-theme", theme);
     } catch { /* Keep the choice for this page even if storage is blocked. */ }

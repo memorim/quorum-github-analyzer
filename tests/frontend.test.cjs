@@ -10,7 +10,7 @@ test('light theme is default; dark mode persists and tolerates blocked storage',
       documentElement: {dataset: {}},
       addEventListener(_event, handler) { loaded = handler; },
       querySelector() { return {
-        setAttribute(_key, value) { pressed = value; },
+        setAttribute(key, value) { assert.equal(key, "aria-checked"); pressed = value; },
         addEventListener(_event, handler) { clicked = handler; },
       }; },
     };
