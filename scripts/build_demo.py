@@ -17,11 +17,19 @@ shutil.copyfile(root / "demo/browser.js", output / "demo.js")
 index = output / "index.html"
 html = index.read_text(encoding="utf8").replace("/static/", "")
 html = html.replace(
-    "<script ", '<script src="seed.js"></script><script src="demo.js"></script><script ', 1
+    "<script ",
+    '<script src="seed.js"></script>'
+    '<script src="public-analysis.js"></script>'
+    '<script src="demo.js"></script><script ',
+    1,
 )
 html = (
     html.replace(
-        "<script>", '<script src="seed.js"></script><script src="demo.js"></script><script>', 1
+        "<script>",
+        '<script src="seed.js"></script>'
+        '<script src="public-analysis.js"></script>'
+        '<script src="demo.js"></script><script>',
+        1,
     )
     if 'src="seed.js"' not in html
     else html
@@ -29,8 +37,9 @@ html = (
 html = html.replace(
     "</body>",
     '<footer class="browser-scope" '
-    'style="padding:16px;text-align:center;font:12px/1.5 system-ui">Изменения в '
-    "этой версии хранятся в текущей вкладке. <a "
+    'style="padding:16px;text-align:center;font:12px/1.5 system-ui">'
+    "История отчётов сохраняется в этом браузере. Данные GitHub запрашиваются напрямую. "
+    "<a "
     'href="https://github.com/memorim/quorum-github-analyzer#readme">Исходный код и '
     "запуск сервера</a></footer></body>",
 )
