@@ -8,8 +8,8 @@
       content="Quorum Repository Analysis — repository intelligence through REST and MCP."
     />
     <title>Quorum — Git intelligence</title>
-    <script src="/static/theme.js"></script>
-    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/theme.js?v=20261103"></script>
+    <link rel="stylesheet" href="/static/styles.css?v=20261103" />
   </head>
   <body>
     <div class="app-shell">
@@ -46,6 +46,16 @@
       </aside>
 
       <main>
+          <div class="panel-tools theme-toolbar">
+            <span class="theme-label">Тёмная тема</span>
+            <button class="theme-toggle" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Тёмная тема" title="Тёмная тема">
+              <span class="theme-state theme-state-off" aria-hidden="true">ВЫКЛ</span>
+              <span class="theme-state theme-state-on" aria-hidden="true">ВКЛ</span>
+              <span class="theme-thumb" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.2A8.5 8.5 0 0 1 10.8 3.5a8.5 8.5 0 1 0 9.7 9.7Z"/></svg>
+              </span>
+            </button>
+          </div>
         <header class="topbar">
           <div>
             <p class="eyebrow">ENGINEERING HEALTH / DEMO</p>
@@ -58,15 +68,6 @@
         </header>
 
         <section class="command-panel" aria-labelledby="analysis-title">
-          <div class="panel-tools">
-            <button class="theme-toggle" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Тёмная тема" title="Тёмная тема">
-              <span class="theme-state theme-state-off" aria-hidden="true">ВЫКЛ</span>
-              <span class="theme-state theme-state-on" aria-hidden="true">ВКЛ</span>
-              <span class="theme-thumb" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.2A8.5 8.5 0 0 1 10.8 3.5a8.5 8.5 0 1 0 9.7 9.7Z"/></svg>
-              </span>
-            </button>
-          </div>
           <div>
             <p class="section-kicker">NEW ANALYSIS</p>
             <h2 id="analysis-title">Inspect a public repository</h2>

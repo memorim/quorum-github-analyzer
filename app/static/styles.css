@@ -784,3 +784,11 @@ footer {
   }
 }
 
+
+/* Keep the theme control visible at the right edge of the dashboard panel. */
+.theme-toolbar {display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:0 0 22px;width:100%}
+.theme-label {font-size:13px;font-weight:600;color:var(--muted)}
+.theme-toolbar .theme-toggle {height:48px;width:96px;flex-basis:96px;border:1px solid #c7abba}
+.theme-toolbar .theme-thumb {width:36px;height:36px;inset:5px auto auto 5px}
+.theme-toolbar .theme-thumb svg {width:24px;height:24px;fill:currentColor;stroke-width:1}
+.theme-toolbar .theme-toggle[aria-checked="true"] .theme-thumb {transform:translateX(48px)}
