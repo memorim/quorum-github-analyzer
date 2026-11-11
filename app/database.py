@@ -5,6 +5,7 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
+from time import time
 from typing import Any
 from uuid import uuid4
 
@@ -60,7 +61,74 @@ class Database:
                     status TEXT NOT NULL DEFAULT 'open',
                     created_at TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS github_cache (
+                    repository TEXT PRIMARY KEY, payload TEXT NOT NULL,
+                    collected_at BIGINT NOT NULL, expires_at BIGINT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS request_budgets (
+                    key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, reset_at BIGINT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS github_cooldown (
+                    key TEXT PRIMARY KEY, retry_at BIGINT NOT NULL
+                );
                 """
+            )
+
+    def cached_bundle(self, repository: str) -> dict | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM github_cache WHERE repository=? AND expires_at>?",
+                (repository.lower(), int(time())),
+            ).fetchone()
+        if not row:
+            return None
+        bundle = json.loads(row["payload"])
+        bundle.setdefault("collection", {})["cache"] = {
+            "available": True,
+            "truncated": False,
+            "error": None,
+            "collected_at": row["collected_at"],
+            "expires_at": row["expires_at"],
+        }
+        return bundle
+
+    def cache_bundle(self, repository: str, bundle: dict, lifetime: int = 60) -> None:
+        now = int(time())
+        with self._connect() as connection:
+            connection.execute(
+                "INSERT INTO github_cache VALUES(?,?,?,?) ON CONFLICT(repository) DO UPDATE SET "
+                "payload=excluded.payload,collected_at=excluded.collected_at,expires_at=excluded.expires_at",
+                (repository.lower(), json.dumps(bundle), now, now + lifetime),
+            )
+            connection.execute("DELETE FROM github_cache WHERE expires_at<?", (now,))
+
+    def take_budget(self, key: str, limit: int = 10, interval: int = 60) -> bool:
+        now = int(time())
+        with self._connect() as connection:
+            row = connection.execute(
+                "INSERT INTO request_budgets VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET "
+                "attempts=CASE WHEN request_budgets.reset_at<=? THEN 1 "
+                "WHEN request_budgets.attempts<? THEN request_budgets.attempts+1 "
+                "ELSE request_budgets.attempts END, "
+                "reset_at=CASE WHEN request_budgets.reset_at<=? THEN ? "
+                "ELSE request_budgets.reset_at END RETURNING attempts",
+                (key, now + interval, now, limit + 1, now, now + interval),
+            ).fetchone()
+        return row["attempts"] <= limit
+
+    def github_retry_after(self) -> int:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT retry_at FROM github_cooldown WHERE key='api'"
+            ).fetchone()
+        return max(0, row["retry_at"] - int(time())) if row else 0
+
+    def pause_github(self, seconds: int) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                "INSERT INTO github_cooldown VALUES('api',?) ON CONFLICT(key) DO UPDATE SET "
+                "retry_at=excluded.retry_at",
+                (int(time()) + min(max(seconds, 1), 86400),),
             )
 
     def save_analysis(self, analysis: dict[str, Any]) -> dict[str, Any]:

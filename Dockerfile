@@ -11,8 +11,11 @@ COPY requirements-lock.txt ./
 COPY app ./app
 
 RUN python -m pip install --no-cache-dir -c requirements-lock.txt .
+RUN groupadd --system quorum && useradd --system --gid quorum --create-home quorum \
+    && mkdir -p /data && chown quorum:quorum /data
+USER quorum
 
 EXPOSE 8010
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8010"]
+CMD ["sh", "-c", "exec python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8010}"]
 

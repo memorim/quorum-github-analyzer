@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime
+from time import time
 from typing import Any
 
 import httpx
@@ -11,7 +12,9 @@ from app.schemas import normalize_repository
 
 
 class GitHubClientError(RuntimeError):
-    pass
+    def __init__(self, message: str, retry_after: int | None = None):
+        super().__init__(message)
+        self.retry_after = retry_after
 
 
 class RepositoryMetadata(BaseModel):
@@ -141,6 +144,7 @@ class GitHubClient:
         except httpx.HTTPStatusError as error:
             response = error.response
             code = response.status_code
+            retry_after = None
             if code == 404:
                 message = "Repository was not found or is private."
             elif code == 429 or (
@@ -151,13 +155,26 @@ class GitHubClient:
                 )
             ):
                 message = "GitHub API rate limit reached. Wait before retrying."
+                delay = response.headers.get("retry-after", "")
+                reset = response.headers.get("x-ratelimit-reset", "")
+                retry_after = min(
+                    86400,
+                    max(
+                        1,
+                        int(delay)
+                        if delay.isdigit()
+                        else int(reset) - int(time())
+                        if reset.isdigit()
+                        else 60,
+                    ),
+                )
             elif code in {401, 403}:
                 message = "GitHub denied access. Check token permissions."
             elif code in {301, 302, 307, 308}:
                 message = "Repository moved. Retry using its current owner/name."
             else:
                 message = f"GitHub API returned {code}."
-            raise GitHubClientError(message) from error
+            raise GitHubClientError(message, retry_after=retry_after) from error
         except httpx.HTTPError as error:
             raise GitHubClientError("Could not connect to the GitHub API.") from error
         try:
@@ -196,4 +213,6 @@ class GitHubClient:
                     str(error) if isinstance(error, GitHubClientError) else "Invalid GitHub data."
                 ),
             )
+            if isinstance(error, GitHubClientError) and error.retry_after:
+                status["retry_after"] = error.retry_after
         return result, status

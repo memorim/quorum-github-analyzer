@@ -39,7 +39,9 @@ async function request(path, options = {}) {
   });
   const payload = await response.json();
   if (!response.ok) {
-    throw new Error(payload.detail || "Request failed.");
+    const retry = Number(response.headers.get('Retry-After'));
+    throw new Error((payload.detail || "Request failed.") +
+      (response.status === 429 && Number.isFinite(retry) && retry > 0 ? ` Retry in ${retry} seconds.` : ''));
   }
   return payload;
 }
