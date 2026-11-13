@@ -1,6 +1,5 @@
 # Quorum - анализ метаданных GitHub
 
-Повторяемый отчёт о сопровождении репозитория по открытым метаданным GitHub.
 
 [Открыть проект](https://memorim.github.io/quorum-github-analyzer/) · [Серверная версия](https://memorim-quorum.onrender.com)
 
